@@ -26,7 +26,7 @@ TP Group srl (50 dipendenti — Sede unica Torino)
 |   +-- VNet: Pondus, Odoo, Gitea, MediaWiki, AD/DNS
 |   +-- Azure SQL Managed Instance (Pondus — geo-replication)
 |   +-- Azure Database for PostgreSQL Flexible Server (Odoo — Zone-Redundant HA)
-|   +-- Azure Kubernetes Service (Odoo app layer)
+|   +-- Azure VM E8s v5 (Odoo app layer)
 |   +-- Azure Firewall + NSG + DDoS Protection
 |   +-- Azure Backup + Site Recovery
 |   +-- Azure Key Vault (segreti, certificati)
@@ -103,11 +103,12 @@ TP Group srl (50 dipendenti — Sede unica Torino)
 
 | Componente | Specifica |
 |---|---|
-| APP | AKS (Azure Kubernetes Service) — deployment containerizzato |
+| APP | VM dedicata (E8s v5, 8 vCPU, 64 GB RAM) — Ubuntu Server LTS |
 | DB | Azure Database for PostgreSQL Flexible Server — Zone-Redundant HA |
-| Scaling | HPA (Horizontal Pod Autoscaler) su carico CPU/memoria |
+| Scaling | Upgrade verticale VM o aggiunta seconda VM + Load Balancer |
 | DR | Site Recovery verso North Europe (RPO 15 min, RTO 1h) |
-| Storage persistenti | Azure Disk (PVC su AKS) per file attaccamenti |
+| Storage | Azure Managed Disk Premium SSD 256 GB + Azure Files per attachment |
+| Note | Scelta VM invece di AKS per minor complessita operativa. Kubernetes si giustifica per carichi microservizi o multi-tenancy; per un'azienda da 50 utenti con 2 sysadmin, una VM Odoo tradizionale e piu gestibile, documentabile e semplice da mantenere. |
 
 #### Gitea (Git/Versioning)
 
@@ -209,7 +210,22 @@ Strato 9  — TRAINING     : Attack Simulation + Security Awareness
 | Security posture | Microsoft Defender for Cloud + Secure Score |
 | Vulnerability scanning | Defender for Cloud (VM + SQL MI) |
 
-### 2.8 Automazione (IaC)
+### 2.8 Dettaglio Costi HPC
+
+Il costo HPC di €230.000 per l'Anno 1 e cosi composto:
+
+| Componente | Calcolo | Importo |
+|---|---|---|
+| **Compute on-demand** (30% carico) | 16 nodi x 1.500h x ~€4,80/h | €115.200 |
+| **Compute spot** (70% carico) | 16 nodi x 3.500h x ~€1,45/h | €81.200 |
+| **Storage HPC** (NetApp Files / Lustre 50TB) | 50TB x ~€0,45/GB/mese x 12 | €27.000 |
+| **Egress** (dati verso sede, 50TB/anno) | 50TB x ~€0,20/GB | €10.000 |
+| **Setup iniziale + benchmark** | Configurazione CycleCloud, Slurm, test performance | €26.600 |
+| **TOTALE HPC Anno 1** | | **€230.000** |
+
+> **Anni successivi:** il costo HPC diventa variabile (€35k–€125k/anno) in base all'effettivo utilizzo di compute spot/on-demand e storage. Nessun vincolo contrattuale pluriennale.
+
+### 2.9 Automazione (IaC)
 
 | Strumento | Utilizzo |
 |---|---|
@@ -229,9 +245,9 @@ Strato 9  — TRAINING     : Attack Simulation + Security Awareness
 | Produttivita | MS365 + LibreOffice | Google Docs | **Microsoft 365 E5** |
 | Video/IM | MS Teams | Google Meet | **MS Teams** |
 | File server | NextCloud (VM) | Google Drive | **OneDrive + SharePoint** |
-| CRM | SugarCRM (VM) | Odoo CRM (SaaS) | **Odoo su AKS** |
-| Timesheet | Kimai (VM) | Odoo Timesheet (SaaS) | **Odoo su AKS** |
-| Contabilita | Profis (Windows) | Odoo Accounting (SaaS) | **Odoo su AKS** |
+| CRM | SugarCRM (VM) | Odoo CRM (SaaS) | **Odoo su Azure VM** |
+| Timesheet | Kimai (VM) | Odoo Timesheet (SaaS) | **Odoo su Azure VM** |
+| Contabilita | Profis (Windows) | Odoo Accounting (SaaS) | **Odoo su Azure VM** |
 | Versioning | Gitea (VM) | Bitbucket (SaaS) | **Gitea su Azure VM** |
 | Documentazione | MediaWiki (VM) | MediaWiki (GCP) | **MediaWiki su Azure VM** |
 | App critica | Pondus (HW fisico) | N/A | **VM IIS + SQL MI (Azure)** |
@@ -298,17 +314,17 @@ Strato 9  — TRAINING     : Attack Simulation + Security Awareness
 |---|---|
 | VM (Pondus, Odoo, Gitea, Wiki, AD) | ~€2.000 |
 | Azure SQL MI (Business Critical, 4 vCore) | ~€1.800 |
-| AKS + PostgreSQL Flexible Server | ~€600 |
+| Azure Database for PostgreSQL Flexible Server | ~€350 |
 | Azure Firewall Standard | ~€800 |
 | Azure VPN Gateway | ~€300 |
 | Azure Bastion + Key Vault | ~€200 |
 | Azure Backup + Site Recovery | ~€500 |
 | Azure Monitor + Log Analytics | ~€300 |
 | Azure NetApp Files / Lustre (HPC storage) | ~€2.250 |
-| **Subtotale** | **~€8.750/mese** |
-| HPC HBv4 (on-demand, 5000h/anno) | ~€19.000/mese medio |
-| **TOTALE** | **~€27.750/mese (Anno 1)** |
-| **TOTALE ricorrente senza HPC** | **~€8.750/mese** |
+| **Subtotale** | **~€8.500/mese** |
+| HPC HBv4 (on-demand, mix, 5000h/anno) | ~€19.000/mese medio |
+| **TOTALE** | **~€27.500/mese (Anno 1)** |
+| **TOTALE ricorrente senza HPC** | **~€8.500/mese** |
 
 ---
 

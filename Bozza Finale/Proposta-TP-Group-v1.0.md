@@ -137,11 +137,23 @@ La presente proposta descrive la strategia, l'architettura target e il piano eco
 
 | Risorsa | Specifiche | Costo Annuo |
 |---|---|---|
-| **Azure HBv4** — 16 nodi elastici | Spot per batch, on-demand per produzione. CycleCloud + Slurm | €230.000 (Anno 1) |
+| **Azure HBv4** — 16 nodi elastici | Spot per batch, on-demand per produzione. CycleCloud + Slurm | €230.000 (Anno 1) — vedi breakdown sotto |
 | **Azure NetApp Files / Managed Lustre** | Storage HPC ad alte prestazioni | €27.000 (Anno 1) |
 | **SQL Managed Instance** | Business Critical, 4 vCore, HA nativa, geo-replication | Incluso in Azure IaaS |
 | **PostgreSQL Flexible Server** | Zone-Redundant HA, failover <2 min | Incluso in Azure IaaS |
 | **VM generiche** | Zimbra (D4s v5), Odoo (E8s v5), Gitea (D4s v5), MediaWiki (D2s v5), IIS Pondus (D4s v5 x2) | Incluso in Azure IaaS |
+
+> **Breakdown HPC Anno 1:**
+> ```
+> Compute (16 nodi HBv4):
+>   On-demand (30% carico): 16 x 1.500h x ~€4,80/h = €115.200
+>   Spot (70% carico): 16 x 3.500h x ~€1,45/h =  €81.200
+>   Subtotale: €196.400
+> Storage (NetApp Files 50TB premium): €27.000
+> Egress (50TB/anno): €10.000
+> Ciclo di setup iniziale + benchmark: €26.600
+>   TOTALE arrotondato: €230.000
+> ```
 
 ### 6.3 Servizi SaaS (pass-through)
 
@@ -200,7 +212,7 @@ La presente proposta descrive la strategia, l'architettura target e il piano eco
 
 #### Fase 4 — Migrazione Applicazioni (Sett. 4-8)
 - Pondus: P2V su Azure VM + Azure SQL MI (Business Critical, geo-replication)
-- Odoo: containerizzazione su AKS + PostgreSQL HA
+- Odoo: VM dedicata (E8s v5) + Azure Database for PostgreSQL Flexible Server Zone-Redundant HA (failover automatico <2 min)
 - Gitea, MediaWiki: deploy su Azure VM
 - Azure Data Box per migrazione 40TB bulk
 
@@ -293,6 +305,7 @@ In caso di recesso anticipato, TP Group corrispondera a 5Stack le prestazioni ef
 | HPC — Azure HBv4 spot + on-demand (16 nodi) | €230.000 |
 | HPC Storage — Azure NetApp Files / Managed Lustre | €27.000 |
 | HPC Egress — dati in uscita verso sede | €10.000 |
+| *(di cui compute: €196.400 / storage: €27.000 / egress: €10.000 / setup: €26.600)* | |
 | Azure Support Plan Standard (risposta <1h) | €12.000 |
 | Azure Bastion | €2.000 |
 | Microsoft Purview (compliance ISO 27001) | €5.000 |
@@ -354,6 +367,37 @@ Tutti i pacchetti includono **6 mesi di formazione in sede (21 giornate)**:
 | **TOTALE** | **€603.000** | **€95.000*** | **€95.000/anno*** |
 
 * HPC variabile escluso (compute, storage, egress a consumo: €35k–€125k/anno)
+
+### 10.6 Analisi TCO — 3 Anni
+
+Confronto tra Full Cloud (proposta) e potenziamento on-premise tradizionale.
+
+| Voce | Full Cloud | On-premise potenziato |
+|---|---|---|
+| **Anno 1** — Infrastruttura | €450.000 | €742.000* |
+| **Anno 1** — Servizi professionali | €153.000 | €50.000 |
+| **Anno 2** | €95.000 | €297.000** |
+| **Anno 3** | €95.000 | €297.000** |
+| **Totale 3 anni (fisso)** | **€793.000** | **€1.386.000** |
+| **HPC variabile (3 anni)** | ~€150.000 | Incluso |
+| **TOTALE 3 ANNI** | **~€943.000** | **~€1.386.000** |
+
+**Risparmio TCO: ~€443.000 (~32%) in 3 anni**
+
+> **Note TCO:**
+> *On-premise Anno 1: nuovo rack + raffreddamento €50k, UPS €20k, 3 server €90k, SAN 50TB €60k, 8 nodi HPC €270k (3yr lease), FortiGate HA €15k, backup enterprise €30k, 2 sistemisti €120k, VMware €15k, M365 E3 €22k
+> **On-premise Anno 2-3: 2 sistemisti €120k, manutenzione HW €25k, elettricità/raffreddamento €30k, ammortamento HPC €90k, M365 E3 €22k, VMware €10k
+
+#### Vantaggi intangibili del Full Cloud (non quantificati nel TCO)
+
+| Vantaggio | Beneficio |
+|---|---|
+| **ISO 27001 compliance** | Zero investimenti aggiuntivi per certificazione |
+| **Zero rischio HW** | Nessuna sostituzione server, nessun guasto componenti |
+| **Scalabilita immediata** | Nuovo nodo in 5 minuti vs 4-6 settimane per ordine HW |
+| **DR multi-region** | Incluso, nessun costo aggiuntivo per sito secondario |
+| **Team IT ridotto** | 6 risorse invece di 8 grazie ad automazione e cloud |
+| **Energy saving** | Zero elettricita/raffreddamento per server in sede |
 
 #### Confronto Pacchetti
 

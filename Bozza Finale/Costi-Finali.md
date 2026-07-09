@@ -14,6 +14,12 @@
 | **Azure Firewall Standard** + NSG + DDoS Protection | €10.000 |
 | **Azure Backup + Site Recovery** (DR North Europe) | €8.000 |
 | **HPC — Azure HBv4** spot + on-demand (16 nodi elastici) | €230.000 |
+| *Breakdown HPC:* | |
+| *Compute on-demand (30%): 16 x 1.500h x ~€4,80/h* | *€115.200* |
+| *Compute spot (70%): 16 x 3.500h x ~€1,45/h* | *€81.200* |
+| *Storage (NetApp Files 50TB premium)* | *€27.000* |
+| *Egress (50TB/anno)* | *€10.000* |
+| *Setup iniziale + benchmark* | *€26.600* |
 | **HPC Storage** — Azure NetApp Files / Managed Lustre | €27.000 |
 | **HPC Egress** — dati in uscita verso sede | €10.000 |
 | **Azure Support Plan Standard** (risposta <1h) | €12.000 |
@@ -109,6 +115,23 @@ Tutti includono **6 mesi di formazione in sede (21 giornate)**: AZ-104, SC-900, 
 | **2 anni*** | €665.000 | €683.000 | €698.000 | €711.000 | €723.000 |
 
 * HPC variabile escluso (35k-125k/anno a consumo)
+
+---
+
+## TCO 3 Anni — Confronto
+
+| Voce | Full Cloud (proposta) | On-premise potenziato |
+|---|---|---|
+| **Anno 1** | €603.000 | €792.000* |
+| **Anno 2** | €95.000 | €297.000** |
+| **Anno 3** | €95.000 | €297.000** |
+| **Totale 3 anni (fisso)** | **€793.000** | **€1.386.000** |
+| **HPC variabile (3 anni)** | ~€150.000 | Incluso |
+| **TOTALE 3 ANNI** | **~€943.000** | **~€1.386.000** |
+| **Risparmio** | | **~€443.000 (~32%)** |
+
+> *On-prem Anno 1: rack + raffreddamento €50k, UPS €20k, 3 server €90k, SAN 50TB €60k, 8 nodi HPC €270k, FortiGate HA €15k, backup €30k, 2 sistemisti €120k, VMware €15k, M365 E3 €22k, consulenza €50k, imprevisti €50k
+> **On-prem Anno 2-3: 2 sistemisti €120k, manutenzione HW €25k, elettricità/raffreddamento €30k, ammortamento HPC €90k, M365 E3 €22k, VMware €10k
 
 ---
 
